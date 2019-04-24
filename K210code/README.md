@@ -1,23 +1,23 @@
-### *pb* file to C file
+### *pb* file to *kmodel* file
 
-Download [nncase](https://github.com/kendryte/nncase) tool and uncompress it. You'll get `ncc` directory.
+Make a directory named `ncc`. Download [nncase](<https://github.com/kendryte/nncase/releases>) tool and uncompress it to `ncc`.
 
 #### *pb* file to tflite
 
-Copy the pretrained model `mobilenetv1_1.0.pb` in `pretrained` directory to `ncc\bin`. Rename it to `mobilenetv1.pb` to avoid the function name error in the following steps.
+Copy the pretrained model `mobilenetv1_1.0.pb` in `pretrained` directory to `ncc\bin`. 
 
-Enter `ncc\bin` directory from *cmd*.
+Enter `ncc\bin` directory.
 
 ```shell
- .\toco.exe --input_file=mobilenetv1.pb --input_format=TENSORFLOW_GRAPHDEF --output_file=mobilenetv1.tflite --output_format=TFLITE --input_shape=1,224,224,3 --input_array=inputs --output_array=MobileNetV1/Bottleneck2/BatchNorm/Reshape_1 --inference=FLOAT
+./toco --input_file=mobilenetv1_1.0.pb --input_format=TENSORFLOW_GRAPHDEF --output_file=mobilenetv1_1.0.tflite --output_format=TFLITE --input_shape=1,224,224,3 --input_array=inputs --output_array=MobileNetV1/Bottleneck2/BatchNorm/Reshape_1 --inference=FLOAT
 ```
 
-#### tflite to C code
+#### tflite to kmodel
 
 Enter `ncc` directory and place the dataset into `ncc\dataset` directory.
 
 ```shell
-.\ncc.exe -i tflite -o k210code --dataset .\dataset\ .\bin\mobilenetv1.tflite .\bin\mobilenetv1.c
+./ncc -i tflite -o k210model --dataset ./dataset ./bin/mobilenetv1_1.0.tflite ./bin/mobilenetv1_1.0.kmodel
 ```
 
 ### Prepare image for test
