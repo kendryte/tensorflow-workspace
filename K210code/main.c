@@ -14,15 +14,18 @@
  */
 #include <stdio.h>
 #include <sysctl.h>
+#include <string.h>
 #include "uarths.h"
 #include "kpu.h"
 #include "incbin.h"
+#include "iomem.h"
+#include "syscalls.h"
 
 #define INCBIN_STYLE INCBIN_STYLE_SNAKE
 #define INCBIN_PREFIX
 
 #define PLL0_OUTPUT_FREQ 800000000UL
-#define PLL1_OUTPUT_FREQ 300000000UL
+#define PLL1_OUTPUT_FREQ 400000000UL
 
 INCBIN(model, "mobilenetv1_1.0.kmodel");
 
@@ -31,6 +34,9 @@ kpu_model_context_t task;
 volatile uint32_t g_ai_done_flag;
 
 extern const unsigned char gImage_image[] __attribute__((aligned(128)));
+
+#define IMAGE_DATA_SIZE (224 * 224 * 3)
+uint8_t *pImage;
 
 static int ai_done(void *ctx)
 {
@@ -48,6 +54,17 @@ int main()
     uarths_init();
     plic_init();
     
+    pImage = (uint8_t*)iomem_malloc(IMAGE_DATA_SIZE);
+    if (pImage)
+    {
+        memcpy(pImage, gImage_image, IMAGE_DATA_SIZE);
+    }
+    else
+    {
+        printf("Bad allocation!\n");
+        return 1;
+    }
+
     if (kpu_load_kmodel(&task, model_data) != 0)
     {
         printf("\nmodel init error\n");
@@ -58,7 +75,7 @@ int main()
 
     printf("System Start\n");
     g_ai_done_flag = 0;
-    kpu_run_kmodel(&task, gImage_image, DMAC_CHANNEL5, ai_done, NULL);
+    kpu_run_kmodel(&task, pImage, DMAC_CHANNEL5, ai_done, NULL);
     while (g_ai_done_flag == 0);
     float *output;
     size_t output_size;

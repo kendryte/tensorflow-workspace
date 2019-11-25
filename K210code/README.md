@@ -4,21 +4,23 @@ Make a directory named `ncc`. Download [nncase](<https://github.com/kendryte/nnc
 
 #### *pb* file to tflite
 
-Copy the pretrained model `mobilenetv1_1.0.pb` in `pretrained` directory to `ncc\bin`. 
+Copy the pretrained model `mobilenetv1_1.0.pb` in `pretrained` directory to `ncc/bin`. 
 
-Enter `ncc\bin` directory.
+Enter `ncc/bin` directory.
 
 ```shell
-./toco --input_file=mobilenetv1_1.0.pb --input_format=TENSORFLOW_GRAPHDEF --output_file=mobilenetv1_1.0.tflite --output_format=TFLITE --input_shape=1,224,224,3 --input_array=inputs --output_array=MobileNetV1/Bottleneck2/BatchNorm/Reshape_1 --inference=FLOAT
+toco --graph_def_file=mobilenetv1_1.0.pb --output_file=mobilenetv1_1.0.tflite --output_format=TFLITE --input_shape=1,224,224,3 --input_arrays=inputs --output_arrays=MobileNetV1/Bottleneck2/BatchNorm/Reshape_1 --inference_type=FLOAT
 ```
 
 #### tflite to kmodel
 
-Enter `ncc` directory and place the dataset into `ncc\dataset` directory.
+Enter `ncc` directory and place a few pictures of your dataset into `ncc/dataset` directory.
 
 ```shell
-./ncc -i tflite -o k210model --dataset ./dataset ./bin/mobilenetv1_1.0.tflite ./bin/mobilenetv1_1.0.kmodel
+./ncc compile ./bin/mobilenetv1_1.0.tflite ./bin/mobilenetv1_1.0.kmodel -i tflite -o kmodel --dataset ./dataset/
 ```
+
+**Note**: Pictures in `ncc/dataset` are used for quantization. They should cover all classes of your dataset.
 
 ### Prepare image for test
 
@@ -39,6 +41,7 @@ with open('image.c','w') as f:
 
 ### Test
 
-Copy the `K210code` directory to `kendryte-standalone-sdk\src`. Build and download to KD233 to check the results.
+Copy the `K210code` directory to `kendryte-standalone-sdk/src`. Build and download to KD233 to check the results.
 
 **Note**: `develop` branch of `kendryte-standalone-sdk` is required.
+
